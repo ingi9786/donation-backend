@@ -1,0 +1,75 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // previewFeatures = []
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+// ======================================
+// Project Model
+// ======================================
+
+model Project {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  name         String
+  projectUsers ProjectUser[]
+}
+
+// ======================================
+// User Model
+// ======================================
+
+model User {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  email        String        @unique
+  username     String        @unique @default(cuid())
+  password     String
+  firstname    String?
+  lastname     String?
+  role         Role
+  posts        Post[]
+  projectUsers ProjectUser[]
+}
+
+model ProjectUser {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  nickname  String?
+  projectId String
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+}
+
+// ======================================
+// Post Model
+// ======================================
+
+model Post {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean
+  title     String
+  content   String?
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  String?
+}
+
+enum Role {
+  ADMIN
+  USER
+}
